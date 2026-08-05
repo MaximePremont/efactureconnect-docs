@@ -1,0 +1,78 @@
+name: Prod Build and Deploy
+
+on:
+  push:
+    branches:
+      - prod
+  workflow_dispatch:
+
+env:
+  REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  IMAGE_NAME: efactureconnect-docs
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Connect to Cloudflare Zero Trust
+        uses: Boostport/setup-cloudflare-warp@v1
+        with:
+          organization: ${{ secrets.CLOUDFLARE_ORGANIZATION }}
+          auth_client_id: ${{ secrets.CLOUDFLARE_AUTH_CLIENT_ID }}
+          auth_client_secret: ${{ secrets.CLOUDFLARE_AUTH_CLIENT_SECRET }}
+          configure_docker_dns: true
+          docker_bip: 192.168.200.1/24
+          docker_default_address_pools: 192.168.204.0/22,24
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install regctl
+        uses: regclient/actions/regctl-installer@v0.1.0
+        with:
+          release: v0.8.2
+
+      - name: Log in to Docker Registry
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | regctl registry login "${{ env.REGISTRY }}" \
+            --user "${{ secrets.DOCKER_USERNAME }}" \
+            --pass-stdin
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=oci,dest=${{ runner.temp }}/${{ env.IMAGE_NAME }}.oci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Push Docker image (chunked upload)
+        run: |
+          regctl image import "ocidir://${{ env.IMAGE_NAME }}:latest" "${{ runner.temp }}/${{ env.IMAGE_NAME }}.oci"
+          regctl image copy \
+            "ocidir://${{ env.IMAGE_NAME }}:latest" \
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+
+      - name: Trigger deployment webhook
+        run: |
+          curl -X POST "${{ secrets.DEPLOY_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{"image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest", "tag": "latest"}'

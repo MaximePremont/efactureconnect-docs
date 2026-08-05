@@ -1,0 +1,71 @@
+name: Release on Tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          # Remove 'v' prefix from tag (e.g., v1.0.0 -> 1.0.0)
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update package.json version
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = process.env.VERSION;
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+
+      - name: Commit and push version update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git push origin main
+
+      - name: Create Pull Request (main -> prod)
+        env:
+          # PAT required if repo has "Allow GitHub Actions to create PRs" disabled
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+        run: |
+          # Check if PR already exists
+          EXISTING_PR=$(gh pr list --base prod --head main --state open --json number -q '.[0].number' 2>/dev/null || true)
+
+          if [ -n "$EXISTING_PR" ]; then
+            echo "Pull request from main to prod already exists: #$EXISTING_PR"
+          else
+            gh pr create \
+              --base prod \
+              --head main \
+              --title "Release v${{ steps.version.outputs.version }}" \
+              --body "Automated release: bump version to **${{ steps.version.outputs.version }}**
+
+          This PR was created automatically when tag \`v${{ steps.version.outputs.version }}\` was pushed."
+          fi
