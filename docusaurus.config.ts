@@ -5,9 +5,10 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'eFactureConnect',
+  title: 'Documentation eFactureConnect',
   tagline: 'Ajoutez la facturation électronique française à Stripe',
   favicon: 'img/favicon.ico',
+  titleDelimiter: '-',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
