@@ -1,0 +1,191 @@
+---
+sidebar_position: 2
+title: Metadata Stripe
+---
+
+# Metadata Stripe
+
+**Avec les metadata Stripe, eFactureConnect peut fonctionner à 100 % automatiquement.**
+
+Stripe ne porte pas nativement toutes les informations exigées par la facturation électronique française (SIRET client, date de livraison, catégorie de transaction, etc.). En les ajoutant via des metadata sur vos objets Stripe, eFactureConnect les lit à la synchronisation et complète les données manquantes, sans action manuelle de votre côté.
+
+C’est **optionnel**, mais **recommandé** : vous réduisez les interventions à la main et vous améliorez l’exactitude des informations transmises.
+
+## Qu’est-ce que les metadata Stripe ?
+
+Les **metadata** sont des paires clé/valeur libres que vous attachez à un objet Stripe (facture, client, ligne, produit…). Elles ne changent pas le comportement de Stripe ; elles portent des informations métier supplémentaires.
+
+Vous les renseignez :
+
+- dans le **Dashboard Stripe**, sur l’objet concerné ;
+- ou via l’**API Stripe** lorsque vous créez ou mettez à jour cet objet.
+
+eFactureConnect **lit** ces metadata à la synchronisation des factures et des avoirs. Il **ne les écrit jamais** sur votre compte Stripe : elles doivent être posées par vous (Dashboard ou votre intégration).
+
+### Exemple : combler une info absente de Stripe
+
+Stripe n’a pas de champ natif pour le SIRET du client. Sans metadata, cette information peut manquer ou devoir être saisie à la main. Avec une metadata `siret` sur la facture (ou le client), eFactureConnect la récupère automatiquement :
+
+```json
+{
+  "siret": "73282932000074",
+  "vat_number": "FR40303265045",
+  "deliveryDate": "2025-01-31"
+}
+```
+
+## Vue d’ensemble par objet Stripe
+
+| Objet Stripe | Clés metadata | Notes |
+| --- | --- | --- |
+| **Invoice** | `siret`, `vat_number`, `deliveryDate` | Pour SIRET / TVA : priorité à l’Invoice avant le Customer |
+| **Customer** | `siret`, `vat_number` | Fallback si absents ou invalides sur l’Invoice |
+| **Invoice Line** | `unitCode` + clés de catégorie (voir ci-dessous) | Synchronisation active |
+| **Product** | `unitCode` | Fallback après le champ natif `unit_label` |
+| **Credit Note Line** | `unitCode` | Puis unité de la ligne de facture parente |
+
+Aucun autre objet (PaymentIntent, Charge, Refund, Subscription, etc.) n’est lu pour ces metadata dans ce flux.
+
+---
+
+## `siret` : SIRET client
+
+| | |
+| --- | --- |
+| **Objets** | Invoice, puis Customer |
+| **Format** | Exactement 14 chiffres, checksum Luhn valide |
+| **Exemple** | `73282932000074` |
+
+**Ordre de résolution**
+
+1. `invoice.metadata.siret` s’il est valide
+2. sinon `customer.metadata.siret` s’il est valide
+3. sinon aucune valeur
+
+Une valeur présente mais invalide est ignorée ; eFactureConnect passe au fallback suivant.
+
+---
+
+## `vat_number` : Numéro de TVA FR client
+
+| | |
+| --- | --- |
+| **Objets** | Invoice, puis Customer ; puis tax IDs Stripe |
+| **Format** | TVA française : `FR` + clé 2 chiffres + SIREN 9 chiffres. Espaces, points et tirets sont ignorés ; la valeur est normalisée en majuscules et doit commencer par `FR`. |
+| **Exemple** | `FR40303265045` |
+
+**Ordre de résolution**
+
+1. `invoice.metadata.vat_number` si valide et préfixe `FR`
+2. sinon `customer.metadata.vat_number` si valide et préfixe `FR`
+3. sinon premier tax ID `eu_vat` du client de la facture dont la valeur est un numéro de TVA FR valide
+4. sinon aucune valeur
+
+Les tax IDs Stripe ne sont **pas** des metadata ; ils servent de fallback complémentaire.
+
+---
+
+## `deliveryDate` : Date de livraison
+
+| | |
+| --- | --- |
+| **Objet** | Invoice uniquement |
+| **Format** | Chaîne non vide interprétable comme date (ex. ISO 8601) |
+| **Exemples** | `2025-01-31` ou `2025-01-31T00:00:00.000Z` |
+
+**Ordre de résolution**
+
+1. `invoice.metadata.deliveryDate` si la date est valide
+2. sinon la date d’émission de la facture (`issueDate`, dérivée de la finalisation ou de la création Stripe)
+
+Si `deliveryDate` est différente de la date d’émission, eFactureConnect inclut les informations de livraison et la date d’exigibilité de TVA correspondantes dans l’e-facture.
+
+---
+
+## Catégorie de transaction (ligne de facture)
+
+À la synchronisation de chaque ligne de facture, eFactureConnect détermine la **catégorie de transaction** (biens taxables, services, hors champ, régime de la marge).
+
+### Clés metadata prioritaires
+
+Sur `invoice_line.metadata`, dans cet ordre :
+
+1. `transaction_category`
+2. `transaction_category_code`
+3. `category_code`
+4. `category`
+5. `super_pdp_category_code`
+6. `super_pdp_transaction_category`
+7. `ereporting_category_code`
+8. `ereporting_transaction_category`
+
+Si aucune de ces clés ne donne une valeur reconnue, eFactureConnect parcourt ensuite **toutes** les valeurs de metadata de la ligne et retient la première valeur parseable.
+
+### Valeurs acceptées
+
+| Forme | Valeurs |
+| --- | --- |
+| Codes | `TLB1`, `TPS1`, `TNT1`, `TMA1` (insensible à la casse) |
+| Slugs | `taxable_goods`, `taxable_services`, `non_taxable`, `margin_scheme` |
+| Alias | `goods` / `product` / `products` → `taxable_goods` ; `service` / `services` → `taxable_services` ; `not_taxable` / `out_of_scope` / `outside_scope` → `non_taxable` ; `margin` → `margin_scheme` |
+
+| Slug | Code | Signification |
+| --- | --- | --- |
+| `taxable_goods` | `TLB1` | Livraison de biens taxables |
+| `taxable_services` | `TPS1` | Prestation de services taxable |
+| `non_taxable` | `TNT1` | Hors champ de TVA |
+| `margin_scheme` | `TMA1` | Régime de la marge |
+
+**Exemples**
+
+```json
+{ "transaction_category": "taxable_services" }
+```
+
+```json
+{ "category_code": "TLB1" }
+```
+
+### Sans metadata de catégorie
+
+Si aucune metadata de ligne n’est reconnue, eFactureConnect s’appuie sur des signaux Stripe (raisons de taxabilité, caractère `shippable` du produit) puis, le cas échéant, sur la catégorie déjà connue du produit en base.
+
+---
+
+## `unitCode` : Unité de quantité (UN/ECE)
+
+| | |
+| --- | --- |
+| **Objets** | Invoice Line, Product ; Credit Note Line |
+| **Clé** | `unitCode` uniquement (camelCase) |
+| **Format** | Code UN/ECE connu (ex. `C62`, `HUR`, `KGM`) ou libellé alias (ex. `heure` → `HUR`, `pièce` → `C62`) |
+| **Défaut** | `C62` (unité / pièce) |
+
+### Facture (Invoice Line)
+
+1. `invoice_line.metadata.unitCode`
+2. sinon `Product.unit_label` (champ Stripe natif, pas une metadata)
+3. sinon `product.metadata.unitCode`
+4. sinon `C62`
+
+### Avoir (Credit Note Line)
+
+1. `credit_note_line.metadata.unitCode`
+2. sinon le libellé / code d’unité déjà résolu sur la ligne de facture parente
+3. sinon `C62`
+
+### Exemples de codes
+
+`C62` (unité), `H87` (pièce), `HUR` (heure), `DAY`, `MON`, `KGM`, `LTR`, `MTR`, `KWH`, `XBX` (box), `XPK` (package), etc.
+
+```json
+{ "unitCode": "HUR" }
+```
+
+---
+
+## Limites
+
+- eFactureConnect **n’écrit jamais** de metadata sur votre compte Stripe.
+- Seuls les objets listés ci-dessus sont lus pour ces metadata applicatives.
+- Les metadata du billing de la plateforme eFactureConnect (abonnements organisations, catalogue de prix, etc.) sont hors sujet de cette page.
