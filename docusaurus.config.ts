@@ -71,11 +71,37 @@ const config: Config = {
           items: [
             {
               label: 'Site',
-              href: 'https://efactureconnect.fr',
+              href: 'http://efactureconnect.fr',
+              target: '_blank',
             },
             {
               label: 'Contact',
               href: 'mailto:contact@efactureconnect.fr',
+            },
+          ],
+        },
+        {
+          title: 'Légal',
+          items: [
+            {
+              label: 'Mentions légales',
+              href: 'http://efactureconnect.fr/mentions-legales',
+              target: '_blank',
+            },
+            {
+              label: 'Politique de confidentialité',
+              href: 'http://efactureconnect.fr/politique-de-confidentialite',
+              target: '_blank',
+            },
+            {
+              label: 'Politique de cookies',
+              href: 'http://efactureconnect.fr/politique-de-cookies',
+              target: '_blank',
+            },
+            {
+              label: 'RGPD',
+              href: 'http://efactureconnect.fr/rgpd',
+              target: '_blank',
             },
           ],
         },
