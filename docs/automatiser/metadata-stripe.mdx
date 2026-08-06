@@ -1,15 +1,15 @@
 ---
-sidebar_position: 2
+sidebar_position: 4
 title: Metadata Stripe
 ---
 
-# Metadata Stripe
+# Metadata Stripe pour l’e-facture
 
-**Avec les metadata Stripe, eFactureConnect peut fonctionner à 100 % automatiquement.**
+Les **metadata Stripe** permettent de fournir dès la source les informations que Stripe ne porte pas nativement pour la facturation électronique française. eFactureConnect les lit à la synchronisation et complète les données manquantes, sans action manuelle de votre côté.
 
-Stripe ne porte pas nativement toutes les informations exigées par la facturation électronique française (SIRET client, date de livraison, catégorie de transaction, etc.). En les ajoutant via des metadata sur vos objets Stripe, eFactureConnect les lit à la synchronisation et complète les données manquantes, sans action manuelle de votre côté.
+C’est l’un des leviers pour [automatiser la conformité e-facture avec Stripe](./). C’est **optionnel**, mais **recommandé** : vous réduisez les interventions à la main et vous améliorez l’exactitude des informations transmises.
 
-C’est **optionnel**, mais **recommandé** : vous réduisez les interventions à la main et vous améliorez l’exactitude des informations transmises.
+Pour collecter le numéro de TVA directement au paiement (hors metadata), voir aussi [Collecter le numéro de TVA au Checkout Stripe](./collecter-tva-checkout-stripe).
 
 ## Qu’est-ce que les metadata Stripe ?
 
@@ -24,22 +24,25 @@ eFactureConnect **lit** ces metadata à la synchronisation des factures et des a
 
 ### Exemple : combler une info absente de Stripe
 
-Stripe n’a pas de champ natif pour le SIRET du client. Sans metadata, cette information peut manquer ou devoir être saisie à la main. Avec une metadata `siret` sur la facture (ou le client), eFactureConnect la récupère automatiquement :
+Stripe n’a pas de champ natif pour le SIREN du client. Sans metadata, cette information peut manquer ou devoir être saisie à la main. Avec une metadata `siren` sur la facture (ou le client), eFactureConnect la récupère automatiquement :
 
 ```json
 {
-  "siret": "73282932000074",
+  "siren": "732829320",
   "vat_number": "FR40303265045",
+  "client_type": "french_company",
   "deliveryDate": "2025-01-31"
 }
 ```
+
+Vous pouvez aussi fournir un `siret` (14 chiffres) : eFactureConnect en déduira le SIREN (9 premiers chiffres) si `siren` est absent.
 
 ## Vue d’ensemble par objet Stripe
 
 | Objet Stripe | Clés metadata | Notes |
 | --- | --- | --- |
-| **Invoice** | `siret`, `vat_number`, `deliveryDate` | Pour SIRET / TVA : priorité à l’Invoice avant le Customer |
-| **Customer** | `siret`, `vat_number` | Fallback si absents ou invalides sur l’Invoice |
+| **Invoice** | `siren`, `siret`, `vat_number`, `client_type`, `deliveryDate` | Pour SIREN / TVA / type : priorité à l’Invoice avant le Customer ; `siret` sert de fallback |
+| **Customer** | `siren`, `siret`, `vat_number`, `client_type` | Fallback si absents ou invalides sur l’Invoice |
 | **Invoice Line** | `unitCode` + clés de catégorie (voir ci-dessous) | Synchronisation active |
 | **Product** | `unitCode` | Fallback après le champ natif `unit_label` |
 | **Credit Note Line** | `unitCode` | Puis unité de la ligne de facture parente |
@@ -48,21 +51,30 @@ Aucun autre objet (PaymentIntent, Charge, Refund, Subscription, etc.) n’est lu
 
 ---
 
-## `siret` : SIRET client
+## `siren` : SIREN client
 
 | | |
 | --- | --- |
-| **Objets** | Invoice, puis Customer |
-| **Format** | Exactement 14 chiffres, checksum Luhn valide |
-| **Exemple** | `73282932000074` |
+| **Objets** | Invoice, puis Customer ; puis TVA FR résolue |
+| **Format SIREN** | Exactement 9 chiffres, checksum Luhn valide |
+| **Format SIRET (fallback)** | Exactement 14 chiffres, checksum Luhn valide → les 9 premiers chiffres forment le SIREN |
+| **Exemple SIREN** | `732829320` |
+| **Exemple SIRET** | `73282932000074` |
 
 **Ordre de résolution**
 
-1. `invoice.metadata.siret` s’il est valide
-2. sinon `customer.metadata.siret` s’il est valide
-3. sinon aucune valeur
+La TVA est résolue en amont, puis utilisée en dernier recours :
+
+1. `invoice.metadata.siren` s’il est valide
+2. sinon `customer.metadata.siren` s’il est valide
+3. sinon `invoice.metadata.siret` s’il est un SIRET valide → SIREN = 9 premiers caractères
+4. sinon `customer.metadata.siret` s’il est un SIRET valide → SIREN = 9 premiers caractères
+5. sinon SIREN extrait du numéro de TVA FR déjà résolu, s’il est valide
+6. sinon aucune valeur
 
 Une valeur présente mais invalide est ignorée ; eFactureConnect passe au fallback suivant.
+
+À la création d’une facture, le SIREN résolu est enregistré. Sur une facture déjà synchronisée, il n’est rempli que s’il était vide : une valeur existante n’est jamais écrasée.
 
 ---
 
@@ -81,7 +93,27 @@ Une valeur présente mais invalide est ignorée ; eFactureConnect passe au fallb
 3. sinon premier tax ID `eu_vat` du client de la facture dont la valeur est un numéro de TVA FR valide
 4. sinon aucune valeur
 
-Les tax IDs Stripe ne sont **pas** des metadata ; ils servent de fallback complémentaire.
+Les tax IDs Stripe ne sont **pas** des metadata ; ils servent de fallback complémentaire. Pour les collecter au paiement, voir [Collecter le numéro de TVA au Checkout Stripe](./collecter-tva-checkout-stripe).
+
+---
+
+## `client_type` : Type de client
+
+| | |
+| --- | --- |
+| **Objets** | Invoice, puis Customer |
+| **Format** | Exactement une des valeurs : `individual`, `french_company`, `foreign_company` (espaces ignorés, minuscules) |
+| **Exemple** | `individual` |
+
+**Ordre de résolution**
+
+1. `invoice.metadata.client_type` s’il est une valeur acceptée
+2. sinon `customer.metadata.client_type` s’il est une valeur acceptée
+3. sinon inférence pays : si le pays du client est défini et différent de `FR` → `foreign_company`, sinon aucune valeur
+
+Une valeur présente mais invalide est ignorée ; eFactureConnect passe au fallback suivant.
+
+À la création d’une facture, le type résolu est enregistré. Sur une facture déjà synchronisée, il n’est rempli que s’il était vide : une valeur existante n’est jamais écrasée.
 
 ---
 
@@ -148,7 +180,7 @@ Si aucune de ces clés ne donne une valeur reconnue, eFactureConnect parcourt en
 
 ### Sans metadata de catégorie
 
-Si aucune metadata de ligne n’est reconnue, eFactureConnect s’appuie sur des signaux Stripe (raisons de taxabilité, caractère `shippable` du produit) puis, le cas échéant, sur la catégorie déjà connue du produit en base.
+Si aucune metadata de ligne n’est reconnue, eFactureConnect s’appuie sur des signaux Stripe (raisons de taxabilité, caractère `shippable` du produit) puis, le cas échéant, sur la catégorie déjà connue du produit en base (voir [Préremplir clients et produits](./preremplir-clients-produits)).
 
 ---
 

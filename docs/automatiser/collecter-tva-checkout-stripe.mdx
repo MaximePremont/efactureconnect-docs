@@ -1,0 +1,75 @@
+---
+sidebar_position: 3
+title: Collecter la TVA au Checkout
+---
+
+# Collecter le numéro de TVA au Checkout Stripe
+
+Stripe permet, via l’option **`tax_id_collection`**, de collecter un numéro de taxe (tax ID) pendant le Checkout. Pour un client professionnel en France, cela se traduit typiquement par la possibilité de saisir un **numéro de TVA**.
+
+eFactureConnect récupère ensuite cette information sur la facture Stripe et peut en déduire des données manquantes pour l’e-facture, notamment le **SIREN**.
+
+C’est l’un des leviers pour [automatiser la conformité e-facture avec Stripe](./).
+
+## Qu’est-ce que `tax_id_collection` ?
+
+Lorsque vous activez `tax_id_collection` sur une **Checkout Session**, Stripe ajoute dans le parcours de paiement une étape pour indiquer si l’acheteur est une entreprise et, le cas échéant, saisir son numéro de TVA (ou autre tax ID supporté).
+
+Concrètement pour vos clients pro :
+
+- une case / option pour indiquer qu’ils achètent en tant que professionnel ;
+- un champ pour entrer le **numéro de TVA**.
+
+Stripe enregistre ce tax ID sur le Customer / la facture associée. Vous n’avez pas à le recopier à la main dans eFactureConnect.
+
+## Qui active cette option ?
+
+**Vous**, dans votre propre intégration Stripe (Checkout sur votre compte marchand).
+
+eFactureConnect ne crée pas les Checkout Sessions de vos clients finaux. Il **consomme** ensuite les tax IDs présents sur les factures synchronisées.
+
+## Ce qu’eFactureConnect en fait
+
+À la synchronisation d’une facture, eFactureConnect résout le numéro de TVA client dans cet ordre :
+
+1. metadata `vat_number` sur l’Invoice (si valide et préfixe `FR`)
+2. sinon metadata `vat_number` sur le Customer
+3. sinon premier tax ID `eu_vat` de la facture (`customer_tax_ids`) dont la valeur est un **numéro de TVA français valide**
+
+Si un numéro de TVA FR est trouvé et qu’aucun SIREN / SIRET metadata n’est disponible, eFactureConnect peut **extraire le SIREN** à partir de ce numéro de TVA.
+
+Seuls les numéros de TVA au **format français** (`FR` + clé + SIREN) sont utilisés pour cette déduction. Un tax ID d’un autre pays européen n’alimente pas le SIREN côté eFactureConnect.
+
+## Exemple : Checkout Session
+
+Activez la collecte dans votre création de session Checkout, par exemple :
+
+```javascript
+const session = await stripe.checkout.sessions.create({
+  mode: 'subscription', // ou 'payment' selon votre cas
+  customer: 'cus_xxx', // ou customer_creation: 'always'
+  line_items: [{ price: 'price_xxx', quantity: 1 }],
+  billing_address_collection: 'required',
+  customer_update: {
+    address: 'auto',
+    name: 'auto',
+  },
+  tax_id_collection: {
+    enabled: true,
+  },
+  success_url: 'https://example.com/success',
+  cancel_url: 'https://example.com/cancel',
+});
+```
+
+Points utiles :
+
+- `tax_id_collection.enabled: true` affiche la collecte du n° de TVA / tax ID.
+- `billing_address_collection` et `customer_update` aident Stripe à garder le Customer à jour (adresse, nom), ce qui améliore aussi la qualité des données synchronisées.
+- En mode `payment`, assurez-vous que votre flux génère bien des **Invoices** Stripe si vous comptez sur la sync eFactureConnect des factures.
+
+## Optionnel, mais recommandé
+
+Sans `tax_id_collection`, eFactureConnect fonctionne toujours : vous pouvez saisir la TVA / le SIREN dans l’interface, ou les fournir via [metadata Stripe](./metadata-stripe).
+
+En l’activant, vous faites saisir l’info **au bon moment** (au checkout), par le client lui-même, et vous réduisez les complétions manuelles ensuite. Combinez avec le [préremplissage clients et produits](./preremplir-clients-produits) pour propager ces infos une fois connues.

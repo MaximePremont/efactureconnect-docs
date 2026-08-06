@@ -1,0 +1,31 @@
+---
+sidebar_position: 1
+title: Vue d’ensemble
+---
+
+# Automatiser la conformité e-facture avec Stripe
+
+Vous pouvez vous approcher d’une **automatisation à 100 %** avec eFactureConnect. L’idée est simple : alimenter vos objets et parcours Stripe pour qu’il reste le moins d’informations manquantes possible sur vos clients (et vos produits), afin que la synchronisation e-facture se fasse sans intervention répétée.
+
+## Pourquoi des informations manquent ?
+
+Stripe est excellent pour le paiement et la facturation commerciale. La réforme française de la facturation électronique exige en plus des données que Stripe ne porte pas toujours nativement : SIREN, type de client, catégorie de transaction, etc.
+
+Sans ces informations, eFactureConnect peut vous demander de compléter une facture à la main. Les leviers ci-dessous réduisent fortement ce besoin.
+
+## Les leviers disponibles
+
+Ces approches se combinent : vous pouvez en utiliser plusieurs en parallèle.
+
+1. **[Préremplir clients et produits](./preremplir-clients-produits)**  
+   Quand vous complétez une fois les infos d’un client ou d’un produit, eFactureConnect peut les reporter sur les autres factures concernées, puis préremplir les suivantes.
+
+2. **[Collecter le numéro de TVA au Checkout Stripe](./collecter-tva-checkout-stripe)**  
+   Activez la collecte de tax ID (`tax_id_collection`) sur votre Checkout : le client pro saisit son n° de TVA, et eFactureConnect peut en déduire des infos manquantes comme le SIREN.
+
+3. **[Metadata Stripe pour l’e-facture](./metadata-stripe)**  
+   Ajoutez des metadata sur vos factures, clients, lignes ou produits Stripe pour fournir dès la source les données absentes des champs natifs.
+
+## À venir : API publique eFactureConnect
+
+Un autre levier futur sera l’utilisation de l’**API publique eFactureConnect**, pour automatiser encore davantage vos flux. Cette API est **encore en développement** : elle n’est pas disponible pour le moment.

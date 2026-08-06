@@ -1,0 +1,77 @@
+---
+sidebar_position: 2
+title: Préremplir clients et produits
+---
+
+# Préremplir clients et produits sur les factures
+
+Lorsque vous complétez des informations manquantes sur un **client** ou un **produit** dans eFactureConnect, ces données peuvent être réutilisées sur les autres factures du même client ou du même produit Stripe. Vous limitez ainsi la nécessité de resaisir les mêmes informations.
+
+C’est l’un des leviers pour [automatiser la conformité e-facture avec Stripe](./).
+
+## Comment ça fonctionne ?
+
+eFactureConnect mémorise un profil par **client Stripe** et par **produit Stripe** (identifiants Stripe, pas le nom ni le SIREN).
+
+Deux moments importants :
+
+1. **Factures déjà présentes** : après un enregistrement, une **modale de confirmation** peut vous proposer d’appliquer les infos aux autres factures concernées.
+2. **Factures futures** : à la synchronisation, les nouvelles factures du même client ou produit sont **préremplies automatiquement** à partir du profil mémorisé.
+
+Seuls les **champs vides** sont complétés. Les valeurs déjà présentes ne sont jamais écrasées.
+
+## Compléter un client
+
+Sur une facture émise, vous renseignez les informations client manquantes puis vous enregistrez.
+
+Si d’autres factures du **même client Stripe** ont encore des champs clients incomplets, eFactureConnect affiche une modale du type :
+
+> **Appliquer ces informations aux autres factures ?**  
+> N autre(s) facture(s) du même client a/ont encore des informations manquantes. Souhaitez-vous y reporter automatiquement les données que vous venez d’enregistrer ? Seuls les champs vides seront complétés ; les valeurs déjà présentes ne seront pas écrasées.
+
+Vous pouvez accepter (**Oui, compléter N facture(s)**) ou refuser (**Non merci**).
+
+### Champs concernés
+
+- Nom du client
+- Pays
+- SIREN
+- Numéro de TVA
+- Taxable en France
+- Type de client
+
+La **date de livraison** n’est pas reportée d’une facture à l’autre : elle reste propre à chaque facture.
+
+### Conditions
+
+- La facture doit être associée à un **Customer Stripe**.
+- Les factures déjà envoyées en e-facture ne sont pas modifiées via cette propagation.
+- Après acceptation, les factures mises à jour sont retraitées automatiquement.
+
+## Compléter un produit (catégorie de transaction)
+
+Sur une ligne de facture, vous choisissez une **catégorie de transaction** (biens taxables, services, hors champ, régime de la marge).
+
+Si d’autres factures du **même produit Stripe** ont encore une catégorie manquante, une modale similaire s’affiche :
+
+> **Appliquer cette catégorie aux autres factures ?**  
+> N autre(s) facture(s) du même produit Stripe a/ont encore une catégorie de transaction manquante…
+
+Après confirmation, eFactureConnect remplit les catégories vides sur ces lignes. Les **futures** factures utilisant ce produit héritent aussi de cette catégorie à la sync, quand elle n’est pas déjà fournie autrement (par exemple via [metadata Stripe](./metadata-stripe)).
+
+### Conditions
+
+- La ligne doit être associée à un **Product Stripe**.
+- La propagation cible les factures encore en données manquantes pour ce produit.
+- Une ligne sans produit Stripe, ou une catégorie remise à « À définir », ne déclenche pas ce mécanisme.
+
+## Pourquoi c’est utile ?
+
+Sans ce préremplissage, chaque facture du même client (ou chaque ligne du même produit) peut redemander les mêmes saisies. En confirmant une fois la propagation, puis en laissant le profil mémorisé faire le reste, vous réduisez fortement le travail manuel tout en gardant le contrôle (modale avant application aux factures existantes).
+
+## Aller plus loin
+
+Pour éviter encore plus de saisies dès la source Stripe, combinez ce levier avec :
+
+- [Collecter le numéro de TVA au Checkout Stripe](./collecter-tva-checkout-stripe)
+- [Metadata Stripe pour l’e-facture](./metadata-stripe)
