@@ -1,0 +1,51 @@
+---
+sidebar_position: 1
+title: Guide d’installation
+---
+
+# Être conforme avec eFactureConnect
+
+Ce guide vous emmène de l’inscription jusqu’à une configuration **conforme** : vos factures partent réellement vers l’administration fiscale. L’idée est simple : suivez les étapes ci-dessous, puis laissez-vous guider par les **todos d’installation** du tableau de bord. Tant qu’il en reste, la configuration n’est pas terminée.
+
+## 1. Créez votre compte
+
+Inscrivez-vous sur eFactureConnect (ou connectez-vous si vous avez déjà un compte). C’est le point de départ pour toute la suite.
+
+## 2. Créez votre organisation
+
+Lors de l’onboarding, vous nommez l’[organisation](../organisation/) qui centralisera vos environnements Stripe, vos membres et votre abonnement. Vous pouvez aussi en créer une plus tard depuis le sélecteur d’organisation.
+
+## 3. (Optionnel) Testez en bac à sable
+
+Avant de passer en production, vous pouvez [tester gratuitement en bac à sable](./tester-bac-a-sable), un peu comme le mode test de Stripe. Vous configurez Stripe et SuperPDP, vous synchronisez vos factures et vous validez le parcours de bout en bout.
+
+:::warning[Ce n’est pas de la conformité]
+
+Le bac à sable sert uniquement à tester. Les factures peuvent partir vers la PDP partenaire, mais **pas** vers le gouvernement. Pour être conforme, il faut le mode **Production**.
+
+:::
+
+## 4. Souscrivez un abonnement
+
+Le mode production nécessite un [abonnement](../abonnements/). Exemple et bac à sable restent gratuits ; la production, elle, active l’envoi réel et vos obligations d’e-facturation.
+
+## 5. Passez en mode Production
+
+Dans la barre de navigation, ouvrez le sélecteur de [modes](./les-modes) et choisissez **Production**. Sans abonnement actif, eFactureConnect vous oriente vers la page d’abonnement.
+
+## 6. Suivez les todos d’installation
+
+Sur le tableau de bord, eFactureConnect affiche les étapes restantes pour votre environnement. Traitez-les dans l’ordre :
+
+1. **Connecter Stripe** : ajoutez votre clé API pour créer l’environnement et synchroniser vos factures. Voir [Connecter Stripe](../connecter-stripe/).
+2. **Compléter les informations de l’environnement** : SIRET, TVA, type d’activité, régime d’exigibilité, etc. Ces paramètres préparent la facturation électronique.
+3. **Configurer la connexion Super PDP** : inscrivez votre entreprise et connectez la plateforme partenaire pour émettre des factures conformes. Voir [Se connecter à SuperPDP](../superpdp/).
+4. **Activer le traitement automatique des factures** : sans cette option, chaque facture synchronisée n’est envoyée que si vous cliquez sur « Demander le traitement ». Activez-la dans les paramètres de l’environnement pour que les nouvelles factures soient traitées automatiquement.
+
+Quand toutes les todos sont terminées, votre configuration production est prête : vous êtes en mesure d’émettre de façon conforme.
+
+## Les todos : votre guide vivant
+
+Vous n’avez pas besoin de mémoriser cette page. Le tableau de bord eFactureConnect affiche en permanence ce qu’il reste à faire. Si une clé Stripe expire, si SuperPDP doit être reconnecté ou si un paramètre manque, une nouvelle todo apparaît. En les suivant, vous restez (ou redevenez) conforme.
+
+Pour approfondir un sujet, parcourez aussi [les modes](./les-modes), [les abonnements](../abonnements/) et [l’automatisation](../automatiser/).

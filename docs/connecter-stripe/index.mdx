@@ -1,0 +1,23 @@
+---
+sidebar_position: 1
+title: Vue d’ensemble
+---
+
+# Connecter Stripe à eFactureConnect
+
+eFactureConnect lit vos factures, avoirs et remboursements Stripe pour constituer les documents de facturation électronique française. Pour cela, chaque environnement (bac à sable ou production) a besoin d’une **clé API Stripe** de votre compte marchand.
+
+Cette clé permet notamment de :
+
+1. synchroniser les factures, lignes, clients, produits et taux de taxe ;
+2. synchroniser les avoirs et les remboursements ;
+3. créer et maintenir les **webhooks** de l’environnement, pour réagir aux mises à jour Stripe en temps réel.
+
+Sans clé valide, les synchronisations et les envois à l’administration fiscale sont interrompus.
+
+## Dans cette section
+
+1. **[Trouver sa clé API Stripe](./trouver-cle-api-stripe)** : où la récupérer dans le Dashboard Stripe, où la saisir dans eFactureConnect, formats acceptés.
+2. **[Créer une clé avec des permissions limitées](./cle-restreinte-permissions)** : clés restreintes (`rk_…`), intérêt, liste exhaustive des permissions nécessaires.
+
+La connexion Stripe fait partie des todos d’installation. Voir le [guide d’installation](../demarrer/) et [Tester en bac à sable](../demarrer/tester-bac-a-sable).

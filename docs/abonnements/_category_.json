@@ -1,0 +1,8 @@
+{
+  "label": "Abonnements",
+  "position": 4,
+  "link": {
+    "type": "doc",
+    "id": "abonnements/index"
+  }
+}

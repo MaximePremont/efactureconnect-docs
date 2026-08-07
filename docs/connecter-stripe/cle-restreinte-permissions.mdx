@@ -1,0 +1,37 @@
+---
+sidebar_position: 3
+title: Clé restreinte Stripe
+---
+
+# Créer une clé Stripe avec des permissions limitées
+
+Une clé secrète (`sk_…`) donne un accès complet à votre compte Stripe. Une **clé restreinte** (`rk_…`) permet de n’accorder que les permissions dont eFactureConnect a besoin.
+
+Ce n’est **pas obligatoire** pour utiliser eFactureConnect : une clé secrète est acceptée. La clé restreinte est simplement une bonne pratique de sécurité.
+
+## Intérêt
+
+En cas de fuite ou de rotation, vous limitez la surface d’accès. eFactureConnect n’a besoin que de lire vos objets de facturation et d’écrire les endpoints webhook de l’environnement. Tout le reste peut rester refusé sur la clé.
+
+## Comment la créer
+
+1. Ouvrez le [tableau de bord des clés API Stripe](https://dashboard.stripe.com/apikeys).
+2. Choisissez **Create restricted key**.
+3. Accordez au minimum les permissions listées ci-dessous (libellés du Dashboard Stripe).
+4. Copiez la clé (`rk_test_…` ou `rk_live_…`) et collez-la dans eFactureConnect, comme pour une clé secrète. Voir [Trouver sa clé API Stripe](./trouver-cle-api-stripe).
+
+Si une permission manque, eFactureConnect refuse l’enregistrement et indique lesquelles corriger.
+
+## Permissions nécessaires (liste exhaustive)
+
+| Ressource (Dashboard Stripe) | Niveau | Pourquoi eFactureConnect en a besoin |
+| --- | --- | --- |
+| Invoices (Factures) | Lecture | Synchroniser les factures, lignes et paiements |
+| Credit Notes (Avoirs) | Lecture | Synchroniser les avoirs et leurs lignes |
+| Customers (Clients) | Lecture | Résoudre les clients des factures et avoirs |
+| Products (Produits) | Lecture | Résoudre les produits des lignes |
+| Tax Rates (Taux de taxe) | Lecture | Résoudre les taux de taxe des lignes |
+| Charges and Refunds (Paiements et remboursements) | Lecture | Synchroniser les remboursements |
+| Webhook Endpoints (Endpoints webhook) | Écriture | Créer, mettre à jour et supprimer les webhooks de l’environnement |
+
+Lors de la validation, eFactureConnect peut créer puis supprimer un endpoint webhook temporaire de test (description du type « DUMMY - eFactureConnect permission probe »). S’il reste orphelin dans Stripe, vous pouvez le supprimer sans risque.

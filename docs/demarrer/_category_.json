@@ -1,0 +1,8 @@
+{
+  "label": "Démarrer",
+  "position": 2,
+  "link": {
+    "type": "doc",
+    "id": "demarrer/index"
+  }
+}

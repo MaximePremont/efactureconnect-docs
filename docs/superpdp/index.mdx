@@ -1,0 +1,71 @@
+---
+sidebar_position: 1
+title: Se connecter à SuperPDP
+---
+
+# Se connecter à SuperPDP
+
+**SuperPDP** est une plateforme de dématérialisation partenaire (PDP) agréée. eFactureConnect s’appuie sur SuperPDP pour inscrire votre entreprise au registre de facturation électronique et transmettre vos e-factures / e-rapports au réseau public.
+
+Autrement dit : eFactureConnect orchestre la conformité côté Stripe et interface, SuperPDP assure le lien réglementaire avec le dispositif national. C’est un **partenaire** d’eFactureConnect, pas un concurrent à configurer séparément pour ce parcours.
+
+## Où et comment se connecter
+
+1. Ouvrez la page **Environnement** (propriétaires), ou cliquez sur la todo **Configurer la connexion Super PDP** / **Inscrire mon entreprise avec eFactureConnect x SuperPDP** depuis le tableau de bord.
+2. Démarrez la connexion : eFactureConnect vous redirige vers SuperPDP (OAuth).
+3. Suivez les étapes sur SuperPDP (détail ci-dessous), puis revenez automatiquement dans eFactureConnect une fois l’autorisation terminée.
+
+En **bac à sable**, deux dialogues s’affichent avant la redirection : rappel que la connexion est de test, puis une consigne importante sur la validation d’identité.
+
+## Les étapes sur SuperPDP
+
+Une fois redirigé, le parcours côté SuperPDP suit typiquement ces étapes.
+
+### 1. Création de compte ou connexion
+
+Créez un compte SuperPDP ou connectez-vous si vous en avez déjà un.
+
+### 2. Validation des informations de l’entreprise
+
+Vérifiez et validez les informations de votre entreprise (identité légale, coordonnées, etc.). Elles doivent être cohérentes avec ce que vous avez renseigné dans eFactureConnect.
+
+### 3. Accord et inscription à l’annuaire
+
+À cette étape, vous donnez votre **accord**, puis vous choisissez une option d’**inscription à l’annuaire** de facturation électronique.
+
+L’annuaire est le registre national qui permet aux entreprises de se trouver pour échanger des factures électroniques (adresses électroniques de réception / émission). L’inscription via une PDP est une étape clé de la réforme.
+
+Deux cas fréquents :
+
+- Si votre entreprise est **déjà inscrite** via une autre PDP, sélectionnez :  
+  **« Je ne souhaite pas inscrire pour le moment d’adresse électronique de réception. »**
+- Si vous souhaitez vous **inscrire pour recevoir** les factures électroniques via SuperPDP et eFactureConnect, sélectionnez :  
+  **« Je souhaite inscrire l’adresse 000000001 pour recevoir des factures avec effet immédiat. »**
+
+:::warning[Réception pas encore publique sur eFactureConnect]
+
+Il est possible de choisir l’inscription à la réception côté SuperPDP, mais la **fonctionnalité complète de réception** n’est pas encore publique dans eFactureConnect. L’émission reste le cœur du produit aujourd’hui. Voir [À venir](../a-venir/).
+
+:::
+
+### 4. Vérification d’identité (KYC)
+
+Vous devez vérifier votre identité via le processus KYC de SuperPDP : en production, cela passe en général par le scan d’un **QR code** sur votre téléphone et la présentation de vos **papiers d’identité**.
+
+C’est une étape **légale** imposée dans le cadre du dispositif, pas un choix d’eFactureConnect.
+
+:::warning[Bac à sable : n’utilisez pas le QR code]
+
+Le bac à sable SuperPDP ne prend pas réellement en charge l’étape de validation d’identité. Pour finaliser la connexion sans rester bloqué :
+
+**Ne scannez pas le QR code sur votre téléphone.**
+
+Utilisez uniquement le **lien affiché sur votre ordinateur** pour valider votre identité.
+
+:::
+
+## Après la connexion
+
+Dans eFactureConnect, la carte SuperPDP indique l’état de la connexion et des vérifications (entreprise, identité). Si la connexion devient invalide ou si l’inscription au registre manque, une todo vous le signalera.
+
+Pour le parcours global, voir le [guide d’installation](../demarrer/) et [Tester en bac à sable](../demarrer/tester-bac-a-sable).

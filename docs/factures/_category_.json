@@ -1,0 +1,8 @@
+{
+  "label": "Factures",
+  "position": 7,
+  "link": {
+    "type": "doc",
+    "id": "factures/index"
+  }
+}

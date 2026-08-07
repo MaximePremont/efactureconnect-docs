@@ -1,0 +1,58 @@
+---
+sidebar_position: 3
+title: Tester en bac à sable
+---
+
+# Tester en bac à sable gratuitement
+
+Le **bac à sable** eFactureConnect joue un rôle comparable au mode test de Stripe : vous pouvez exercer vos flux de facturation électronique de bout en bout, avec vos données, sans déclencher d’envoi officiel vers l’administration fiscale.
+
+## À quoi ça sert ?
+
+En bac à sable, vous connectez Stripe, vous configurez SuperPDP, vous synchronisez et traitez des factures. Les documents peuvent partir vers la PDP partenaire pour valider le parcours technique, mais ils ne sont **pas** transmis au gouvernement. C’est un environnement de test gratuit, pas une mise en conformité.
+
+## Sélectionner le mode Bac à sable
+
+Dans la barre de navigation, ouvrez le sélecteur de [modes](./les-modes) et choisissez **Bac à sable**. La bannière du tableau de bord vous rappelle que vous êtes en test gratuit, pas encore conforme.
+
+## Les étapes d’installation
+
+Le tableau de bord affiche des **todos d’installation**. Traitez-les une par une.
+
+### 1. Connecter Stripe
+
+Votre environnement bac à sable n’est pas encore configuré. Connectez votre clé API Stripe pour le créer et synchroniser vos factures. En bac à sable, une clé test (`sk_test_…` / `rk_test_…`) ou live est acceptée. Voir [Connecter Stripe](../connecter-stripe/).
+
+### 2. Compléter les informations de l’environnement
+
+Renseignez les paramètres légaux (SIRET, TVA, type d’activité, régimes, etc.) nécessaires pour préparer la facturation électronique.
+
+### 3. Configurer la connexion Super PDP
+
+SuperPDP est la plateforme agréée partenaire qui transmet vos factures au réseau public. Connectez votre environnement pour pouvoir émettre. eFactureConnect vous redirige vers SuperPDP pour le parcours d’inscription et d’autorisation.
+
+:::warning[Attention : validation d’identité en bac à sable]
+
+Le bac à sable SuperPDP ne prend pas réellement en charge l’étape de validation d’identité (KYC). Pour finaliser la connexion sans rester bloqué :
+
+**Ne scannez pas le QR code sur votre téléphone.**
+
+Utilisez uniquement le **lien affiché sur votre ordinateur** pour valider votre identité.
+
+Avant la redirection, eFactureConnect affiche aussi cette consigne dans un dialogue. Le détail du parcours SuperPDP est dans [Se connecter à SuperPDP](../superpdp/).
+
+:::
+
+### 4. Activer le traitement automatique des factures
+
+Sans traitement automatique, les factures synchronisées ne sont envoyées que si vous cliquez sur « Demander le traitement ». Activez-le dans les paramètres de l’environnement pour un parcours réaliste.
+
+### 5. Passez en production pour être conforme
+
+Quand votre configuration de test est prête, c’est la dernière étape proposée : passer en mode production pour envoyer réellement vos déclarations. Tant que vous restez en bac à sable, aucun envoi officiel n’est effectué.
+
+:::warning[Le bac à sable ne vous rend pas conforme]
+
+Vous pouvez tout essayer sans frais, mais **cela ne remplace pas la production**. Pour être conforme, souscrivez un [abonnement](../abonnements/), passez en mode **Production**, puis reprenez les todos d’installation côté production. Le [guide d’installation](./) détaille ce parcours.
+
+:::

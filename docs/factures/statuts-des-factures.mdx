@@ -1,0 +1,120 @@
+---
+sidebar_position: 2
+title: Statuts des factures
+---
+
+# Les différents statuts des factures
+
+Le libellé affiché dépend de la situation. Tant que la facture est dans un état de préparation (exigibilité « affichable »), c’est ce libellé qui apparaît. Ensuite, eFactureConnect montre l’avancement du workflow e-facture ou e-rapport.
+
+Voici les libellés dans un **ordre logique**, avec leur signification et l’action attendue.
+
+## Avant l’envoi (préparation)
+
+### Non traitée
+
+Cette facture n’a pas encore été analysée pour déterminer si une e-facture ou un e-rapport est requis.
+
+**Action :** vous pouvez demander le traitement en cliquant sur « Demander le traitement ».
+
+### En attente de traitement
+
+Le traitement est planifié. eFactureConnect déterminera bientôt le type de flux à appliquer (e-facture et/ou e-rapport).
+
+**Action :** assurez-vous d’avoir entièrement configuré votre environnement.
+
+### En attente d’émission
+
+La facture Stripe n’est pas encore finalisée. Le flux e-facture démarrera une fois la facture émise.
+
+**Action :** finalisez l’émission de la facture dans Stripe. Aucune action n’est possible ici tant qu’elle n’est pas émise.
+
+### Informations manquantes
+
+Des informations obligatoires manquent pour constituer le document électronique.
+
+**Action :** cliquez sur « Compléter » ou ouvrez la facture pour renseigner les informations manquantes.
+
+### Non applicable
+
+Ce document n’est pas soumis à l’obligation d’e-facture ni d’e-rapport.
+
+**Action :** aucune action de votre part n’est nécessaire.
+
+## Flux e-facture
+
+Une fois le régime « e-facture » engagé, le document suit ce cycle.
+
+### En attente d’envoi (e-facture)
+
+L’e-facture est prête et en file d’attente pour être transmise à la plateforme de dématérialisation partenaire (PDP).
+
+**Action :** aucune. L’envoi sera effectué automatiquement.
+
+### Envoi en cours (e-facture)
+
+L’e-facture est en cours de transmission vers la PDP.
+
+**Action :** patientez jusqu’à la fin de l’envoi.
+
+### En traitement (e-facture)
+
+L’e-facture a été reçue par la PDP et est en cours de traitement.
+
+**Action :** patientez jusqu’à l’acceptation ou un éventuel rejet.
+
+### En attente, suspendue
+
+Le traitement de l’e-facture est temporairement suspendu.
+
+**Action :** vérifiez que votre environnement et votre connexion PDP sont correctement configurés, puis attendez la reprise du traitement.
+
+### Acceptée (e-facture)
+
+L’e-facture a été acceptée. Cette étape du cycle de vie est terminée avec succès.
+
+**Action :** aucune.
+
+### Rejetée (e-facture)
+
+L’e-facture a été rejetée par la plateforme ou le destinataire.
+
+**Action :** consultez le détail de l’erreur, corrigez si possible, puis utilisez « Essayer d’envoyer de nouveau ». Vous pouvez aussi « Ignorer cette erreur » si elle n’est plus pertinente.
+
+### Erreur (e-facture)
+
+Une erreur technique est survenue lors du traitement de l’e-facture.
+
+**Action :** même logique que pour un rejet : consulter, corriger si possible, réessayer ou ignorer.
+
+## Flux e-rapport de transaction
+
+Pour certains régimes (notamment hors e-facture pure), eFactureConnect envoie un **e-rapport de transaction**.
+
+| Libellé | Signification | Action |
+| --- | --- | --- |
+| En attente d’envoi (e-rapport transaction) | Prêt, en file d’attente vers la PDP | Aucune, envoi automatique |
+| Envoi en cours (e-rapport transaction) | Transmission en cours | Patienter |
+| En traitement (e-rapport transaction) | Reçu par la PDP, traitement en cours | Patienter |
+| Accepté (e-rapport transaction) | Étape terminée avec succès | Aucune |
+| Rejeté (e-rapport transaction) | Rejet | Consulter l’erreur, réessayer ou ignorer |
+| Erreur (e-rapport transaction) | Erreur technique | Consulter l’erreur, réessayer ou ignorer |
+
+## Flux e-rapport de paiement
+
+Lorsque le régime exige aussi le reporting des paiements, un second cycle suit (souvent après l’e-facture ou l’e-rapport de transaction).
+
+| Libellé | Signification | Action |
+| --- | --- | --- |
+| En attente d’envoi (e-rapport paiement) | Prêt, en file d’attente vers la PDP | Aucune, envoi automatique |
+| Envoi en cours (e-rapport paiement) | Transmission en cours | Patienter |
+| En traitement (e-rapport paiement) | Reçu par la PDP, traitement en cours | Patienter |
+| Accepté (e-rapport paiement) | Étape terminée avec succès | Aucune |
+| Rejeté (e-rapport paiement) | Rejet | Consulter l’erreur, réessayer ou ignorer |
+| Erreur (e-rapport paiement) | Erreur technique | Consulter l’erreur, réessayer ou ignorer |
+
+## En résumé
+
+La plupart du temps, si l’environnement est bien configuré et le traitement automatique activé, vous n’intervenez que pour les états **Informations manquantes**, **Rejetée** ou **Erreur**. Les étapes « en attente / envoi / traitement / acceptée » avancent seules.
+
+Pour limiter les cas « Informations manquantes », voir [Automatiser à 100 %](../automatiser/).

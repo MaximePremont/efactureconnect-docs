@@ -1,0 +1,40 @@
+---
+sidebar_position: 2
+title: Trouver sa clé API Stripe
+---
+
+# Comment trouver sa clé API Stripe
+
+eFactureConnect utilise une clé API **secrète** (`sk_…`) ou **restreinte** (`rk_…`) de votre compte Stripe marchand. Ce n’est pas la clé de facturation de la plateforme eFactureConnect : c’est **votre** clé, pour lire vos factures et brancher les webhooks de l’environnement.
+
+## Où la trouver dans Stripe
+
+1. Ouvrez le [tableau de bord des clés API Stripe](https://dashboard.stripe.com/apikeys).
+2. Choisissez le bon mode Stripe (**Test** ou **Live**) selon votre environnement eFactureConnect.
+3. Copiez une clé secrète existante, ou créez une [clé restreinte](./cle-restreinte-permissions) via **Create restricted key**.
+
+Gardez cette clé confidentielle : elle donne accès à vos données de facturation Stripe selon les permissions accordées.
+
+## Où la saisir dans eFactureConnect
+
+Sur la page **Environnement** de l’organisation (réservée aux propriétaires) :
+
+- lors de la **création** de l’environnement, le formulaire demande la clé API Stripe ;
+- ensuite, la carte **Clé API Stripe** permet d’ajouter, de modifier ou de rétablir une clé si elle est devenue invalide.
+
+Vous pouvez aussi démarrer depuis la todo **Connecter Stripe** du tableau de bord.
+
+## Formats acceptés
+
+| Environnement eFactureConnect | Clés acceptées |
+| --- | --- |
+| Bac à sable | `sk_test_…` / `rk_test_…` ou `sk_live_…` / `rk_live_…` |
+| Production | `sk_live_…` ou `rk_live_…` uniquement |
+
+En bac à sable, une clé live est donc acceptée pour tester avec des données réelles côté Stripe, tout en restant hors envoi officiel au gouvernement. En production, seule une clé live convient.
+
+## À quoi sert la clé pour eFactureConnect ?
+
+Une fois enregistrée et validée, eFactureConnect s’en sert pour synchroniser vos objets de facturation et pour gérer les webhooks de l’environnement. C’est le prérequis pour que les factures apparaissent dans eFactureConnect et puissent être traitées (e-facture / e-rapport).
+
+Pour limiter les droits de la clé, voir [Créer une clé Stripe avec des permissions limitées](./cle-restreinte-permissions). Ce n’est **pas obligatoire** : une clé secrète complète fonctionne aussi.

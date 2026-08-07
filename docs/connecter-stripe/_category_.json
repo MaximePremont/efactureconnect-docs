@@ -1,0 +1,8 @@
+{
+  "label": "Connecter Stripe",
+  "position": 5,
+  "link": {
+    "type": "doc",
+    "id": "connecter-stripe/index"
+  }
+}
