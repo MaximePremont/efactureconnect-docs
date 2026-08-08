@@ -16,12 +16,12 @@ WORKDIR /app
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy source code
+# Copy source code (includes .env from CI / local build context)
 COPY . .
 
 ENV NODE_ENV=production
 
-# Build the static site
+# Build the static site (.env is loaded by docusaurus.config via dotenv)
 RUN npm run build
 
 # Stage 3: Runner

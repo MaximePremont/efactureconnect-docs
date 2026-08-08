@@ -18,7 +18,7 @@ coverage
 .DS_Store
 *.pem
 
-# Local env files
+# Local env files (.env itself is needed at build time for PostHog, etc.)
 .env*.local
 
 # TypeScript

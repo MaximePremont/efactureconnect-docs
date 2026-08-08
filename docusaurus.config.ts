@@ -1,6 +1,10 @@
+import {config as loadEnv} from 'dotenv';
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+
+// Load .env for local and Docker builds (customFields are baked at build time)
+loadEnv();
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -26,6 +30,15 @@ const config: Config = {
   i18n: {
     defaultLocale: 'fr',
     locales: ['fr'],
+  },
+
+  clientModules: [require.resolve('./src/clientModules/posthog.ts')],
+
+  customFields: {
+    posthogProjectToken:
+      process.env.POSTHOG_PROJECT_TOKEN || process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN || '',
+    posthogHost: process.env.POSTHOG_HOST || 'https://eu.i.posthog.com',
+    posthogDisabled: process.env.DISABLE_POSTHOG === 'true',
   },
 
   presets: [
@@ -61,6 +74,16 @@ const config: Config = {
           label: 'Site',
           position: 'right',
         },
+        {
+          href: 'https://app.efactureconnect.fr/login?utm_source=docs&utm_medium=docs&utm_campaign=documentation&utm_content=navbar',
+          label: 'Connexion',
+          position: 'right',
+        },
+        {
+          href: 'https://app.efactureconnect.fr/register?utm_source=docs&utm_medium=docs&utm_campaign=documentation&utm_content=navbar',
+          label: 'Créer un compte',
+          position: 'right',
+        },
       ],
     },
     footer: {
@@ -71,8 +94,12 @@ const config: Config = {
           items: [
             {
               label: 'Site',
-              href: 'http://efactureconnect.fr',
+              href: 'https://efactureconnect.fr',
               target: '_blank',
+            },
+            {
+              label: 'Créer un compte',
+              href: 'https://app.efactureconnect.fr/register?utm_source=docs&utm_medium=docs&utm_campaign=documentation&utm_content=footer',
             },
             {
               label: 'Contact',
@@ -85,22 +112,22 @@ const config: Config = {
           items: [
             {
               label: 'Mentions légales',
-              href: 'http://efactureconnect.fr/mentions-legales',
+              href: 'https://efactureconnect.fr/mentions-legales',
               target: '_blank',
             },
             {
               label: 'Politique de confidentialité',
-              href: 'http://efactureconnect.fr/politique-de-confidentialite',
+              href: 'https://efactureconnect.fr/politique-de-confidentialite',
               target: '_blank',
             },
             {
               label: 'Politique de cookies',
-              href: 'http://efactureconnect.fr/politique-de-cookies',
+              href: 'https://efactureconnect.fr/politique-de-cookies',
               target: '_blank',
             },
             {
               label: 'RGPD',
-              href: 'http://efactureconnect.fr/rgpd',
+              href: 'https://efactureconnect.fr/rgpd',
               target: '_blank',
             },
           ],
