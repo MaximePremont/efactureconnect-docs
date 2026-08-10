@@ -103,7 +103,7 @@ const config: Config = {
             },
             {
               label: 'Contact',
-              href: 'mailto:contact@efactureconnect.fr',
+              href: 'mailto:support@efactureconnect.fr',
             },
           ],
         },
