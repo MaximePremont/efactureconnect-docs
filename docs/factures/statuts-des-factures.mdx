@@ -91,13 +91,13 @@ Une erreur technique est survenue lors du traitement de l’e-facture.
 
 Pour certains régimes (notamment hors e-facture pure), eFactureConnect envoie un **e-rapport de transaction**.
 
-SuperPDP regroupe les e-rapports et les traite en fin du mois suivant ; un statut « En attente d’envoi » prolongé est donc normal.
+SuperPDP regroupe les e-rapports et les traite en fin du mois suivant ; un statut « En traitement » prolongé est donc normal.
 
 | Libellé | Signification | Action |
 | --- | --- | --- |
-| En attente d’envoi (e-rapport transaction) | Prêt, en file d’attente vers la PDP. SuperPDP regroupe les e-rapports et les traite en fin du mois suivant | Aucune, envoi automatique |
+| En attente d’envoi (e-rapport transaction) | Prêt, en file d’attente vers la PDP | Aucune, envoi automatique |
 | Envoi en cours (e-rapport transaction) | Transmission en cours | Patienter |
-| En traitement (e-rapport transaction) | Reçu par la PDP, traitement en cours | Patienter |
+| En traitement (e-rapport transaction) | Reçu par la PDP, traitement en cours. SuperPDP regroupe les e-rapports et les traite en fin du mois suivant | Patienter |
 | Accepté (e-rapport transaction) | Étape terminée avec succès | Aucune |
 | Rejeté (e-rapport transaction) | Rejet | Consulter l’erreur, réessayer ou ignorer |
 | Erreur (e-rapport transaction) | Erreur technique | Consulter l’erreur, réessayer ou ignorer |
@@ -106,11 +106,9 @@ SuperPDP regroupe les e-rapports et les traite en fin du mois suivant ; un statu
 
 Lorsque le régime exige aussi le reporting des paiements, un second cycle suit (souvent après l’e-facture ou l’e-rapport de transaction).
 
-SuperPDP regroupe les e-rapports et les traite en fin du mois suivant ; un statut « En attente d’envoi » prolongé est donc normal.
-
 | Libellé | Signification | Action |
 | --- | --- | --- |
-| En attente d’envoi (e-rapport paiement) | Prêt, en file d’attente vers la PDP. SuperPDP regroupe les e-rapports et les traite en fin du mois suivant | Aucune, envoi automatique |
+| En attente d’envoi (e-rapport paiement) | Prêt, en file d’attente vers la PDP | Aucune, envoi automatique |
 | Envoi en cours (e-rapport paiement) | Transmission en cours | Patienter |
 | En traitement (e-rapport paiement) | Reçu par la PDP, traitement en cours | Patienter |
 | Accepté (e-rapport paiement) | Étape terminée avec succès | Aucune |
